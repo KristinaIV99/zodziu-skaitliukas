@@ -191,18 +191,18 @@
   
   <div class="goal-section">
     <button class="goal-btn" id="goalBtn" onclick="showGoalEdit()">
-      Tikslas: <span id="goalDisplay">50</span> žodžių ✏️
+      Tikslas: <span id="goalDisplay">20</span> žodžių ✏️
     </button>
     <div class="goal-edit hidden" id="goalEdit">
       <span>Tikslas:</span>
-      <input type="number" class="goal-input" id="goalInput" value="50">
+      <input type="number" class="goal-input" id="goalInput" value="20">
       <button class="goal-ok" onclick="saveGoal()">OK</button>
     </div>
   </div>
   
   <div class="counter-display">
     <div class="count" id="count">0</div>
-    <div class="count-label">iš <span id="goalLabel">50</span></div>
+    <div class="count-label">iš <span id="goalLabel">20</span></div>
   </div>
   
   <div class="progress-bar">
@@ -227,7 +227,7 @@
     }
     
     let count = 0;
-    let goal = 50;
+    let goal = 20;
     let audioCtx = null;
     
     // Load saved data
@@ -235,7 +235,7 @@
     if (saved) {
       const data = JSON.parse(saved);
       count = data.count || 0;
-      goal = data.goal || 50;
+      goal = data.goal || 20;
     }
     
     updateDisplay();
@@ -322,7 +322,7 @@
     }
     
     function saveGoal() {
-      goal = parseInt(document.getElementById('goalInput').value) || 50;
+      goal = parseInt(document.getElementById('goalInput').value) || 20;
       document.getElementById('goalBtn').classList.remove('hidden');
       document.getElementById('goalEdit').classList.add('hidden');
       updateDisplay();
