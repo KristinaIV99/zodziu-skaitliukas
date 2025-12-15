@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#1e1b4b">
+  <meta name="description" content="Skaičiuok išverstus žodžius">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" href="./icon-192.png">
+  <title>Žodžių Skaitliukas</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      background: linear-gradient(135deg, #0f172a 0%, #4c1d95 50%, #0f172a 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      padding: 20px;
+      user-select: none;
+    }
+    
+    .goal-section {
+      margin-bottom: 20px;
+    }
+    
+    .goal-btn {
+      background: transparent;
+      border: none;
+      color: rgba(255,255,255,0.5);
+      font-size: 14px;
+      cursor: pointer;
+      padding: 8px 16px;
+    }
+    
+    .goal-edit {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .goal-edit span {
+      color: rgba(255,255,255,0.7);
+    }
+    
+    .goal-input {
+      width: 70px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: white;
+      font-size: 16px;
+      text-align: center;
+    }
+    
+    .goal-ok {
+      padding: 6px 14px;
+      background: #8b5cf6;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    
+    .counter-display {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    
+    .count {
+      font-size: 96px;
+      font-weight: bold;
+      color: white;
+      line-height: 1;
+      transition: color 0.3s;
+    }
+    
+    .count.complete {
+      color: #4ade80;
+    }
+    
+    .count-label {
+      font-size: 24px;
+      color: rgba(255,255,255,0.6);
+      margin-top: 8px;
+    }
+    
+    .progress-bar {
+      width: 260px;
+      height: 12px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 32px;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: #a78bfa;
+      border-radius: 6px;
+      transition: width 0.3s, background 0.3s;
+    }
+    
+    .progress-fill.complete {
+      background: #4ade80;
+    }
+    
+    .main-btn {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      border: none;
+      font-size: 64px;
+      font-weight: bold;
+      color: white;
+      background: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%);
+      box-shadow: 0 10px 40px rgba(139, 92, 246, 0.4);
+      cursor: pointer;
+      transition: transform 0.1s, box-shadow 0.1s;
+      margin-bottom: 32px;
+    }
+    
+    .main-btn:active {
+      transform: scale(0.95);
+    }
+    
+    .main-btn.complete {
+      background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+      box-shadow: 0 10px 40px rgba(74, 222, 128, 0.4);
+    }
+    
+    .action-btns {
+      display: flex;
+      gap: 16px;
+    }
+    
+    .action-btn {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 12px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    
+    .undo-btn {
+      background: rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.7);
+    }
+    
+    .undo-btn:disabled {
+      opacity: 0.3;
+    }
+    
+    .reset-btn {
+      background: rgba(239, 68, 68, 0.2);
+      color: #fca5a5;
+    }
+    
+    .celebration {
+      margin-top: 24px;
+      font-size: 20px;
+      color: #4ade80;
+      animation: pulse 1s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  
+  <div class="goal-section">
+    <button class="goal-btn" id="goalBtn" onclick="showGoalEdit()">
+      Tikslas: <span id="goalDisplay">50</span> žodžių ✏️
+    </button>
+    <div class="goal-edit hidden" id="goalEdit">
+      <span>Tikslas:</span>
+      <input type="number" class="goal-input" id="goalInput" value="50">
+      <button class="goal-ok" onclick="saveGoal()">OK</button>
+    </div>
+  </div>
+  
+  <div class="counter-display">
+    <div class="count" id="count">0</div>
+    <div class="count-label">iš <span id="goalLabel">50</span></div>
+  </div>
+  
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+  </div>
+  
+  <button class="main-btn" id="mainBtn" onclick="increment()">+1</button>
+  
+  <div class="action-btns">
+    <button class="action-btn undo-btn" id="undoBtn" onclick="undo()" disabled>← Atšaukti</button>
+    <button class="action-btn reset-btn" onclick="reset()">Iš naujo</button>
+  </div>
+  
+  <div class="celebration hidden" id="celebration">🎉 Tikslas pasiektas!</div>
+
+  <script>
+    // Register Service Worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js')
+        .then(() => console.log('SW registered'))
+        .catch((err) => console.log('SW registration failed:', err));
+    }
+    
+    let count = 0;
+    let goal = 50;
+    let audioCtx = null;
+    
+    // Load saved data
+    const saved = localStorage.getItem('wordCounter');
+    if (saved) {
+      const data = JSON.parse(saved);
+      count = data.count || 0;
+      goal = data.goal || 50;
+    }
+    
+    updateDisplay();
+    
+    function getAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+    
+    function playClick() {
+      const ctx = getAudioContext();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      
+      osc.frequency.setValueAtTime(800, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(400, ctx.currentTime + 0.1);
+      
+      gain.gain.setValueAtTime(0.3, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+      
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.1);
+    }
+    
+    function playCelebration() {
+      const ctx = getAudioContext();
+      const notes = [523, 659, 784, 1047];
+      
+      notes.forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        
+        osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.1);
+        gain.gain.setValueAtTime(0.2, ctx.currentTime + i * 0.1);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + i * 0.1 + 0.3);
+        
+        osc.start(ctx.currentTime + i * 0.1);
+        osc.stop(ctx.currentTime + i * 0.1 + 0.3);
+      });
+    }
+    
+    function increment() {
+      playClick();
+      count++;
+      
+      if (count === goal) {
+        setTimeout(playCelebration, 150);
+      }
+      
+      updateDisplay();
+      save();
+    }
+    
+    function undo() {
+      if (count > 0) {
+        count--;
+        updateDisplay();
+        save();
+      }
+    }
+    
+    function reset() {
+      count = 0;
+      updateDisplay();
+      save();
+    }
+    
+    function showGoalEdit() {
+      document.getElementById('goalBtn').classList.add('hidden');
+      document.getElementById('goalEdit').classList.remove('hidden');
+      document.getElementById('goalInput').value = goal;
+      document.getElementById('goalInput').focus();
+    }
+    
+    function saveGoal() {
+      goal = parseInt(document.getElementById('goalInput').value) || 50;
+      document.getElementById('goalBtn').classList.remove('hidden');
+      document.getElementById('goalEdit').classList.add('hidden');
+      updateDisplay();
+      save();
+    }
+    
+    function updateDisplay() {
+      const isComplete = count >= goal;
+      const percentage = Math.min((count / goal) * 100, 100);
+      
+      document.getElementById('count').textContent = count;
+      document.getElementById('count').className = 'count' + (isComplete ? ' complete' : '');
+      
+      document.getElementById('goalDisplay').textContent = goal;
+      document.getElementById('goalLabel').textContent = goal;
+      
+      document.getElementById('progressFill').style.width = percentage + '%';
+      document.getElementById('progressFill').className = 'progress-fill' + (isComplete ? ' complete' : '');
+      
+      document.getElementById('mainBtn').className = 'main-btn' + (isComplete ? ' complete' : '');
+      
+      document.getElementById('undoBtn').disabled = count === 0;
+      
+      document.getElementById('celebration').classList.toggle('hidden', !isComplete);
+    }
+    
+    function save() {
+      localStorage.setItem('wordCounter', JSON.stringify({ count, goal }));
+    }
+    
+    // Handle Enter key in goal input
+    document.getElementById('goalInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') saveGoal();
+    });
+  </script>
+</body>
+</html>
