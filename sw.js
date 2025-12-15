@@ -1,4 +1,4 @@
-const CACHE_NAME = 'zodziu-skaitliukas-v1';
+const CACHE_NAME = 'zodziu-skaitliukas-v2';
 const urlsToCache = [
   './',
   './index.html',
